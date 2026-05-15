@@ -101,6 +101,14 @@ function formatMember(userId: string | null | undefined, members: OrganizationMe
   return match ? `${match.user_id} (${match.role})` : userId;
 }
 
+async function safeFetch<T>(path: string, fallback: T, options?: RequestInit): Promise<T> {
+  try {
+    return await hbFetch<T>(path, options);
+  } catch {
+    return fallback;
+  }
+}
+
 export default function Home() {
   const [snapshot, setSnapshot] = useState<SmsSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,14 +119,21 @@ export default function Home() {
       setLoading(true);
       setError(null);
       try {
-        const [session, organization, members, jobs, watchFeed, fleetStatus, search] = await Promise.all([
+        const [session, organization, members] = await Promise.all([
           hbFetch<SessionUser>("/api/session"),
           hbFetch<OrganizationRead>("/api/organizations/current"),
           hbFetch<OrganizationMemberRead[]>("/api/organizations/members"),
-          hbFetch<JobAssignmentRead[]>("/api/job-assignments"),
-          hbFetch<WatchFeedResponse>("/api/watchlists/feed"),
-          hbFetch<FleetComplianceStatus[]>("/api/compliance/fleet-status"),
-          hbFetch<SearchResponse>("/api/search/sdr", {
+        ]);
+
+        const [jobs, watchFeed, fleetStatus, search] = await Promise.all([
+          safeFetch<JobAssignmentRead[]>("/api/job-assignments", []),
+          safeFetch<WatchFeedResponse>("/api/watchlists/feed", {
+            total: 0,
+            new_count: 0,
+            records: [],
+          }),
+          safeFetch<FleetComplianceStatus[]>("/api/compliance/fleet-status", []),
+          safeFetch<SearchResponse>("/api/search/sdr", { total: 0, results: [] }, {
             method: "POST",
             body: JSON.stringify({ limit: 6, offset: 0 }),
           }),

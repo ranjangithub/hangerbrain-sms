@@ -1,10 +1,9 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_HB_API_URL || "http://localhost:8000";
-const API_BEARER_TOKEN = process.env.NEXT_PUBLIC_HB_API_BEARER_TOKEN || null;
+const API_PROXY_BASE = "/api/hb";
 
 export function buildApiUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path;
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalized}`;
+  return `${API_PROXY_BASE}${normalized}`;
 }
 
 export async function hbFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -13,9 +12,6 @@ export async function hbFetch<T>(path: string, options?: RequestInit): Promise<T
 
   if (!(body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
-  }
-  if (API_BEARER_TOKEN && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${API_BEARER_TOKEN}`);
   }
 
   const response = await fetch(buildApiUrl(path), {

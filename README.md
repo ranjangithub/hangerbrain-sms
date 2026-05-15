@@ -16,6 +16,7 @@ Move beyond checkbox compliance with one safety workspace for:
 
 - **Frontend:** Next.js (App Router, TypeScript)
 - **Data source:** Existing HangarBrain API (`/api/*`)
+- **Bridge:** built-in server-side API proxy (`/api/hb/*`) to avoid browser CORS issues
 - **Auth model:** Uses API session context; optional static bearer token for local/demo
 - **Deployment:** Independent from `hangarbrain-copilot-lite/frontend`
 
@@ -31,12 +32,12 @@ cp .env.example .env.local
 
 Required:
 
-- `NEXT_PUBLIC_HB_API_URL` (example: `http://localhost:8000`)
+- `HB_API_URL` (example: `http://localhost:8000`)
 
 Optional:
 
 - `NEXT_PUBLIC_HB_APP_URL` (link back to core app)
-- `NEXT_PUBLIC_HB_API_BEARER_TOKEN` (dev/demo only; avoid in production browser deployments)
+- `HB_API_BEARER_TOKEN` (dev/demo only; consumed server-side by the SMS proxy)
 
 ## Run locally
 
